@@ -1,0 +1,103 @@
+name: gestao-de-acao
+
+x-app-base: &app-base
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: gestao-de-acao:local
+  environment: &app-environment
+    DDL_AUTO: validate
+    TWELVE_DATA_API_KEY: ${TWELVE_DATA_API_KEY:-test-key}
+  ports:
+    - "${APP_PORT:-8080}:8080"
+
+services:
+  app-host-postgresql:
+    <<: *app-base
+    profiles: ["host-postgresql"]
+    ports:
+      - "127.0.0.1:${APP_PORT:-8080}:8080"
+    environment:
+      <<: *app-environment
+      SPRING_PROFILES_ACTIVE: dev
+      DB_URL: jdbc:postgresql://host.docker.internal:${HOST_POSTGRES_PORT:-5432}/${POSTGRES_DB:-gestaodeacao}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+  frontend:
+    image: gestao-acao-front:local
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    profiles: ["host-postgresql"]
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-4200}:80"
+    depends_on:
+      - app-host-postgresql
+
+  app-postgresql:
+    <<: *app-base
+    profiles: ["postgresql"]
+    environment:
+      <<: *app-environment
+      SPRING_PROFILES_ACTIVE: dev
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-gestaodeacao}
+      DB_USERNAME: ${POSTGRES_USER:-gestao}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-local-postgres-password}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    profiles: ["postgresql"]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gestaodeacao}
+      POSTGRES_USER: ${POSTGRES_USER:-gestao}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-postgres-password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  app-mysql:
+    <<: *app-base
+    profiles: ["mysql"]
+    environment:
+      <<: *app-environment
+      SPRING_PROFILES_ACTIVE: mysql
+      DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-gestaodeacao}
+      DB_USERNAME: ${MYSQL_USER:-gestao}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-local-mysql-password}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.4
+    profiles: ["mysql"]
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-gestaodeacao}
+      MYSQL_USER: ${MYSQL_USER:-gestao}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-local-mysql-password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-local-root-password}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root --password=$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
+
+volumes:
+  postgres-data:
+  mysql-data:

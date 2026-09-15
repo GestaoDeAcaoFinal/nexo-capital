@@ -1,0 +1,30 @@
+# Controle de versao e metadados de ferramentas
+.git
+.gitignore
+.idea
+.vscode
+.agents
+.claude
+.github
+*.iml
+
+# Builds e arquivos temporarios
+target
+build
+*.class
+*.log
+.DS_Store
+**/.DS_Store
+
+# Segredos e configuracoes locais
+.env
+.env.*
+
+# Conteudo que nao participa do build da aplicacao
+docs
+graphify-out
+openspec
+README.md
+HELP.md
+compose.yaml
+mvnw.cmd

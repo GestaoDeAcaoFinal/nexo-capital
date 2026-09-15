@@ -1,0 +1,17 @@
+.operation-query-grid {
+  align-items: start;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1.25fr) minmax(18rem, .75fr);
+}
+
+.operation-query-grid .filter-panel {
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .operation-query-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,145 @@
+<div class="page-shell home-page">
+  <section class="hero-panel" aria-labelledby="home-title">
+    <p class="eyebrow">RESUMO EXECUTIVO</p>
+    <h1 id="home-title">Visão consolidada dos seus investimentos</h1>
+    <p>Acompanhe o patrimônio, a composição da carteira e as movimentações mais recentes.</p>
+    <div class="hero-actions">
+      <a class="btn-finance-primary" routerLink="/operacoes/nova">Registrar operação</a>
+      <a class="btn-finance-secondary" routerLink="/carteira">Abrir carteira</a>
+    </div>
+  </section>
+
+  <section class="dashboard-section" aria-labelledby="dashboard-title">
+    <div class="dashboard-heading">
+      <div>
+        <p class="eyebrow">VISÃO CONSOLIDADA</p>
+        <h2 id="dashboard-title">Resumo da carteira</h2>
+      </div>
+      <button
+        type="button"
+        class="btn-finance-secondary dashboard-refresh"
+        (click)="carregarDashboard()"
+        [disabled]="carteiraState.loading || operacoesState.loading">
+        Atualizar dados
+      </button>
+    </div>
+
+    @if ((carteiraState.loading && !carteiraState.data) || (operacoesState.loading && !operacoesState.data)) {
+      <div class="status-panel surface-card" role="status" aria-live="polite">
+        <strong>Atualizando sua carteira…</strong>
+        <span>Estamos reunindo posições e movimentações recentes.</span>
+      </div>
+    }
+
+    @if (carteiraState.error || operacoesState.error) {
+      <div class="status-panel status-panel--error surface-card" role="alert">
+        <strong>Parte do resumo não pôde ser carregada.</strong>
+        <span>{{ carteiraState.error?.message || operacoesState.error?.message }}</span>
+        <button type="button" class="btn-finance-secondary" (click)="carregarDashboard()">Tentar novamente</button>
+      </div>
+    }
+
+    @if (carteiraState.data; as carteira) {
+      <div class="metric-grid">
+        <article class="metric-card surface-card">
+          <span>Valor atual</span>
+          <strong class="numeric" data-testid="valor-atual">{{ carteira.valorAtualCarteira | currency:'BRL' }}</strong>
+          <small>Patrimônio marcado pelas cotações atuais</small>
+        </article>
+        <article class="metric-card surface-card">
+          <span>Custo investido</span>
+          <strong class="numeric" data-testid="custo-total">{{ carteira.custoTotalCarteira | currency:'BRL' }}</strong>
+          <small>Capital líquido aplicado nas posições</small>
+        </article>
+        <article class="metric-card surface-card" [class.metric-card--positive]="resultadoCarteira >= 0" [class.metric-card--negative]="resultadoCarteira < 0">
+          <span>Resultado nominal</span>
+          <strong class="numeric" data-testid="resultado">{{ resultadoCarteira | currency:'BRL' }}</strong>
+          <small>Diferença entre valor atual e custo</small>
+        </article>
+        <article class="metric-card surface-card">
+          <span>Ações em posse</span>
+          <strong class="numeric" data-testid="quantidade-total">{{ carteira.quantidadeTotal }}</strong>
+          <small>{{ carteira.posicoes.length }} ativo(s) na carteira</small>
+        </article>
+      </div>
+
+      <div class="dashboard-grid">
+        <article class="dashboard-card surface-card" aria-labelledby="allocation-title">
+          <header class="dashboard-card__header">
+            <div>
+              <p class="eyebrow">COMPOSIÇÃO</p>
+              <h3 id="allocation-title">Distribuição por ativo</h3>
+            </div>
+            <a routerLink="/carteira">Ver carteira</a>
+          </header>
+          @if (carteira.posicoes.length === 0) {
+            <div class="dashboard-empty">
+              <strong>Sua carteira ainda está vazia.</strong>
+              <span>Registre uma compra para acompanhar a distribuição.</span>
+            </div>
+          } @else {
+            <div class="allocation-list">
+              @for (posicao of posicoesRelevantes; track posicao.acaoId) {
+                <div class="allocation-row">
+                  <div class="allocation-row__label">
+                    <span class="ticker-badge">{{ posicao.ticker }}</span>
+                    <strong class="numeric">{{ posicao.valorAtual | currency:'BRL' }}</strong>
+                  </div>
+                  <div class="allocation-row__detail">
+                    <div class="allocation-track">
+                      <span
+                        class="allocation-fill"
+                        role="progressbar"
+                        [attr.aria-label]="'Participação de ' + posicao.ticker + ' na carteira'"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        [attr.aria-valuenow]="allocationPercent(posicao)"
+                        [style.width.%]="allocationPercent(posicao)">
+                      </span>
+                    </div>
+                    <span class="numeric">{{ allocationPercent(posicao) | number:'1.0-1' }}%</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </article>
+
+        <article class="dashboard-card surface-card" aria-labelledby="recent-title">
+          <header class="dashboard-card__header">
+            <div>
+              <p class="eyebrow">MOVIMENTAÇÕES</p>
+              <h3 id="recent-title">Operações recentes</h3>
+            </div>
+            <a routerLink="/operacoes">Ver histórico</a>
+          </header>
+          @if (operacoesRecentes.length === 0) {
+            <div class="dashboard-empty">
+              <strong>Nenhuma operação registrada.</strong>
+              <span>Suas compras e vendas mais recentes aparecerão aqui.</span>
+            </div>
+          } @else {
+            <div class="recent-list">
+              @for (operacao of operacoesRecentes; track operacao.id) {
+                <div class="recent-operation">
+                  <span class="trade-badge" [class.trade-badge--buy]="operacao.tipoOperacao === 'COMPRA'" [class.trade-badge--sell]="operacao.tipoOperacao === 'VENDA'">
+                    {{ operacao.tipoOperacao }}
+                  </span>
+                  <div class="recent-operation__asset">
+                    <strong>{{ operacao.acao.ticker }}</strong>
+                    <span>{{ operacao.dataOperacao | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                  <div class="recent-operation__value numeric">
+                    <strong>{{ operacao.valorTotal | currency:(operacao.acao.moeda || 'BRL') }}</strong>
+                    <span>{{ operacao.quantidade }} unidade(s)</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </article>
+      </div>
+    }
+  </section>
+
+</div>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="002" author="gustavo">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <not><tableExists tableName="corretora"/></not>
+                <not><tableExists tableName="produto"/></not>
+                <not><tableExists tableName="acoes"/></not>
+                <not><tableExists tableName="operacao_acao"/></not>
+            </and>
+        </preConditions>
+
+        <!-- CORRETORA -->
+        <createTable tableName="corretora">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"
+                             nullable="false"/>
+            </column>
+
+            <column name="cnpj" type="VARCHAR(255)"/>
+            <column name="razao_social" type="VARCHAR(255)"/>
+            <column name="nome_fantasia" type="VARCHAR(255)"/>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="telefone" type="VARCHAR(255)"/>
+            <column name="cep" type="VARCHAR(255)"/>
+            <column name="logradouro" type="VARCHAR(255)"/>
+            <column name="numero" type="VARCHAR(255)"/>
+            <column name="complemento" type="VARCHAR(255)"/>
+            <column name="bairro" type="VARCHAR(255)"/>
+            <column name="cidade" type="VARCHAR(255)"/>
+            <column name="uf" type="VARCHAR(255)"/>
+            <column name="situacao_cadastral" type="VARCHAR(255)"/>
+            <column name="validada_na_cvm" type="BOOLEAN"/>
+            <column name="data_cadastro" type="TIMESTAMP"/>
+
+        </createTable>
+
+
+        <!-- ACAO / PRODUTO -->
+        <createTable tableName="produto">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"
+                             nullable="false"/>
+            </column>
+
+            <column name="ticker" type="VARCHAR(255)"/>
+            <column name="nome_empresa" type="VARCHAR(255)"/>
+            <column name="mercado" type="VARCHAR(255)"/>
+            <column name="moeda" type="VARCHAR(255)"/>
+            <column name="cotacao_atual" type="DOUBLE PRECISION"/>
+            <column name="data_hora_cotacao" type="TIMESTAMP"/>
+
+            <column name="corretora_id" type="BIGINT"/>
+
+        </createTable>
+
+
+        <!-- OPERACAO ACAO -->
+        <createTable tableName="operacao_acao">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"
+                             nullable="false"/>
+            </column>
+
+            <column name="quantidade" type="INTEGER"/>
+            <column name="preco_unitario" type="DOUBLE PRECISION"/>
+            <column name="preco_medio" type="DOUBLE PRECISION"/>
+            <column name="lucro_prejuizo" type="DOUBLE PRECISION"/>
+            <column name="data_operacao" type="TIMESTAMP"/>
+            <column name="valor_total" type="DOUBLE PRECISION"/>
+            <column name="tipo_operacao" type="VARCHAR(255)"/>
+
+            <column name="acao_id" type="BIGINT"/>
+
+        </createTable>
+
+
+        <!-- FK: PRODUTO -> CORRETORA -->
+        <addForeignKeyConstraint
+                baseTableName="produto"
+                baseColumnNames="corretora_id"
+                referencedTableName="corretora"
+                referencedColumnNames="id"
+                constraintName="fk_produto_corretora"/>
+
+
+        <!-- FK: OPERACAO_ACAO -> PRODUTO -->
+        <addForeignKeyConstraint
+                baseTableName="operacao_acao"
+                baseColumnNames="acao_id"
+                referencedTableName="produto"
+                referencedColumnNames="id"
+                constraintName="fk_operacao_acao_produto"/>
+
+    </changeSet>
+
+</databaseChangeLog>

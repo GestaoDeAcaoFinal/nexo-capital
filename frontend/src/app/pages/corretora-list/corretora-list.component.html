@@ -1,0 +1,138 @@
+<div class="page-shell">
+  <nav class="breadcrumb-nav" aria-label="Navegação estrutural">
+    <a routerLink="/">Início</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">Corretoras</span>
+  </nav>
+
+  <header class="list-toolbar">
+    <div class="list-toolbar__copy">
+      <p class="eyebrow">Instituições</p>
+      <h1 class="page-heading">Corretoras</h1>
+      <p class="form-intro">Consulte por ID ou CNPJ e acompanhe todas as corretoras.</p>
+    </div>
+    <a routerLink="/corretoras/nova" class="btn-finance-primary">Nova corretora</a>
+  </header>
+
+  <section class="filter-panel surface-card query-panel--compact" aria-labelledby="consulta-corretora">
+    <div class="panel-heading">
+      <p class="eyebrow">Localização rápida</p>
+      <h2 id="consulta-corretora">Consulta direta</h2>
+      <p>Encontre uma corretora pelo identificador interno ou pelo CNPJ.</p>
+    </div>
+    <form class="row g-3 align-items-end" [formGroup]="searchForm" (ngSubmit)="buscar()" novalidate>
+      <div class="col-md-3">
+        <label for="criterio" class="form-label">Consultar por</label>
+        <select id="criterio" class="form-select" formControlName="criterio">
+          <option value="id">ID</option>
+          <option value="cnpj">CNPJ</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label for="valor" class="form-label">Valor</label>
+        <input id="valor" class="form-control" formControlName="valor" autocomplete="off">
+        @if (searchForm.controls.valor.touched && searchForm.controls.valor.invalid) {
+          <div class="field-error" role="alert">
+            @if (searchForm.controls.valor.hasError('positiveInteger')) {
+              Informe um ID inteiro positivo.
+            } @else if (searchForm.controls.valor.hasError('cnpj')) {
+              Informe um CNPJ válido.
+            } @else {
+              Informe o valor da consulta.
+            }
+          </div>
+        }
+      </div>
+      <div class="col-md-3">
+        <button class="btn-finance-secondary w-100" type="submit" [disabled]="searchState.loading">
+          {{ searchState.loading ? 'Consultando…' : 'Consultar' }}
+        </button>
+      </div>
+    </form>
+    @if (searchState.loading) {
+      <div class="status-panel mt-3" role="status" aria-live="polite">Consultando corretora…</div>
+    } @else if (searchState.error) {
+      <div class="status-panel status-panel--error mt-3" role="alert">
+        <strong>{{ searchState.error.title }}:</strong> {{ searchState.error.message }}
+      </div>
+    } @else {
+      @if (searchState.data; as corretora) {
+        <div class="search-result mt-3" role="status">
+        <span class="search-result__label">Corretora encontrada</span>
+        <strong>{{ corretora.razaoSocial || 'Razão social não informada' }}</strong>
+        <span class="monospace-data">{{ corretora.cnpj }}</span>
+        @if (corretora.cidade || corretora.uf) {
+          <span>{{ corretora.cidade || 'Cidade não informada' }}/{{ corretora.uf || 'UF não informada' }}</span>
+        } @else {
+          <span>Localidade não informada</span>
+        }
+        </div>
+      }
+    }
+  </section>
+
+  @if (listState.loading) {
+    <section class="status-panel surface-card" role="status" aria-live="polite">
+      <strong>Carregando corretoras…</strong>
+      <span>Os dados cadastrais estão sendo consultados.</span>
+    </section>
+  } @else if (listState.error) {
+    <section class="status-panel status-panel--error surface-card" role="alert">
+      <strong>{{ listState.error.title }}:</strong>
+      <span>{{ listState.error.message }}</span>
+      <button class="btn-finance-secondary" type="button" (click)="carregarCorretoras()">Tentar novamente</button>
+    </section>
+  } @else if (listState.data?.length === 0) {
+    <section class="status-panel surface-card">
+      <strong>Nenhuma corretora cadastrada.</strong>
+      <span>Cadastre uma instituição para começar.</span>
+    </section>
+  } @else if (listState.data) {
+    <section class="table-panel surface-card" aria-labelledby="corretoras-cadastradas">
+      <div class="table-panel__header">
+        <div>
+          <p class="eyebrow">Cadastro</p>
+          <h2 id="corretoras-cadastradas">Corretoras cadastradas</h2>
+        </div>
+        <span class="record-count numeric" data-testid="corretora-count">
+          {{ listState.data.length }} {{ listState.data.length === 1 ? 'registro' : 'registros' }}
+        </span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover finance-table align-middle">
+          <caption class="visually-hidden">Lista de corretoras cadastradas</caption>
+          <thead>
+            <tr>
+              <th class="numeric" scope="col">ID</th>
+              <th scope="col">Razão social</th>
+              <th scope="col">CNPJ</th>
+              <th scope="col">Localidade</th>
+              <th scope="col">Situação</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (corretora of listState.data; track corretora.id) {
+              <tr>
+                <td class="numeric">{{ corretora.id }}</td>
+                <td><strong class="cell-primary">{{ corretora.razaoSocial || 'Razão social não informada' }}</strong></td>
+                <td class="monospace-data">{{ corretora.cnpj }}</td>
+                <td>
+                  @if (corretora.cidade || corretora.uf) {
+                    {{ corretora.cidade || 'Cidade não informada' }}/{{ corretora.uf || 'UF não informada' }}
+                  } @else {
+                    Localidade não informada
+                  }
+                </td>
+                <td>
+                  <span class="entity-status" [class.entity-status--verified]="corretora.validadaNaCvm">
+                    {{ corretora.validadaNaCvm ? 'Validada na CVM' : (corretora.situacaoCadastral || 'Não informada') }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

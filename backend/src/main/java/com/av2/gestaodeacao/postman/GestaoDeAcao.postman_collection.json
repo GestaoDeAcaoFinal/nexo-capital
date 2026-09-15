@@ -1,0 +1,463 @@
+{
+  "info": {
+    "_postman_id": "c8955837-593c-408b-a4b7-4d3bed2929a9",
+    "name": "GestaoDeAcao",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "48369349",
+    "_collection_link": "https://go.postman.co/collection/48369349-c8955837-593c-408b-a4b7-4d3bed2929a9?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Acao",
+      "item": [
+        {
+          "name": "create",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"ticker\": \"PETR4\",\r\n  \"corretoraId\": \"2\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BaseUrl}}/acoes",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "acoes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listAll",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BaseUrl}}/acoes",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "acoes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "findByTicker",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BaseUrl}}/acoes/ticker/PETR4",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "acoes",
+                "ticker",
+                "PETR4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "atualizar-cotacao",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BaseUrl}}/acoes/1/atualizar-cotacao",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "acoes",
+                "1",
+                "atualizar-cotacao"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "findById",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BaseUrl}}/acoes/1",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "acoes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create2",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"ticker\": \"VALE3\",\r\n    \"corretoraId\": \"1\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BaseUrl}}/acoes",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "acoes"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "OperacaoAcao",
+      "item": [
+        {
+          "name": "findByOperacaoId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BaseUrl}}/operacoes/buscar/1",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "operacoes",
+                "buscar",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "createCompra",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{BaseUrl}}/operacoes/comprar/1?quantidade=5",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "operacoes",
+                "comprar",
+                "1"
+              ],
+              "query": [
+                {
+                  "key": "quantidade",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listAll",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BaseUrl}}/operacoes",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "operacoes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "createCompra2",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{BaseUrl}}/operacoes/comprar/2?quantidade=7",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "operacoes",
+                "comprar",
+                "2"
+              ],
+              "query": [
+                {
+                  "key": "quantidade",
+                  "value": "7"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "createVenda1",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{BaseUrl}}/operacoes/vender/1?quantidade=2",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "operacoes",
+                "vender",
+                "1"
+              ],
+              "query": [
+                {
+                  "key": "quantidade",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listCompra",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BaseUrl}}/operacoes/compras",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "operacoes",
+                "compras"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listVenda",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BaseUrl}}/operacoes/vendas",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "operacoes",
+                "vendas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listHIstoricoAcao",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BaseUrl}}/operacoes/1",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "operacoes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "createVenda2",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{BaseUrl}}/operacoes/vender/2?quantidade=4",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "operacoes",
+                "vender",
+                "2"
+              ],
+              "query": [
+                {
+                  "key": "quantidade",
+                  "value": "4"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Corretora",
+      "item": [
+        {
+          "name": "listAll",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"cnpj\": \"123456789\",\r\n  \"cep\": \"01001000\"\r\n}"
+            },
+            "url": {
+              "raw": "{{BaseUrl}}/corretoras",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "corretoras"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"cnpj\": \"00000000000191\",\r\n  \"cep\": \"01001000\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BaseUrl}}/corretoras",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "corretoras"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "findById",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BaseUrl}}/corretoras/1",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "corretoras",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "findByCnpj",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BaseUrl}}/corretoras/cnpj/00000000000191",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "corretoras",
+                "cnpj",
+                "00000000000191"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create2",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"cnpj\": \"02332886000104\",\r\n    \"cep\": \"91790072\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BaseUrl}}/corretoras",
+              "host": [
+                "{{BaseUrl}}"
+              ],
+              "path": [
+                "corretoras"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

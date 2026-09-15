@@ -1,0 +1,166 @@
+<div class="page-shell">
+  <nav class="breadcrumb-nav" aria-label="Navegação estrutural">
+    <a routerLink="/">Início</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">Operações</span>
+  </nav>
+
+  <header class="list-toolbar">
+    <div class="list-toolbar__copy">
+      <p class="eyebrow">Movimentações</p>
+      <h1 class="page-heading">Operações</h1>
+      <p class="form-intro">Consulte compras, vendas, movimentações por ativo e detalhes por identificador.</p>
+    </div>
+    <a routerLink="/operacoes/nova" class="btn-finance-primary">Nova operação</a>
+  </header>
+
+  <div class="operation-query-grid">
+    <section class="filter-panel surface-card" aria-labelledby="filtros-operacoes">
+    <div class="panel-heading">
+      <p class="eyebrow">Histórico da carteira</p>
+      <h2 id="filtros-operacoes">Filtrar operações</h2>
+      <p>Selecione um tipo de movimentação ou consulte o histórico de um ativo.</p>
+    </div>
+    <div class="filter-actions" role="group" aria-label="Filtros de operações">
+      <button type="button" class="filter-chip" [class.active]="filtroAtivo === 'todas'" [attr.aria-pressed]="filtroAtivo === 'todas'" (click)="aplicarFiltro('todas')">Todas</button>
+      <button type="button" class="filter-chip" [class.active]="filtroAtivo === 'compras'" [attr.aria-pressed]="filtroAtivo === 'compras'" (click)="aplicarFiltro('compras')">Compras</button>
+      <button type="button" class="filter-chip" [class.active]="filtroAtivo === 'vendas'" [attr.aria-pressed]="filtroAtivo === 'vendas'" (click)="aplicarFiltro('vendas')">Vendas</button>
+    </div>
+    <form class="row g-3 align-items-end filter-form" [formGroup]="historicoForm" (ngSubmit)="buscarHistorico()" novalidate>
+      <div class="col-md-8">
+        <label for="acaoHistorico" class="form-label">Histórico por ação</label>
+        <select id="acaoHistorico" class="form-select" formControlName="acaoId">
+          <option [ngValue]="0">Selecione uma ação</option>
+          @for (acao of acoesState.data || []; track acao.id) {
+            <option [ngValue]="acao.id">{{ acao.ticker }} — {{ acao.nomeEmpresa || 'Empresa não informada' }}</option>
+          }
+        </select>
+        @if (historicoForm.controls.acaoId.touched && historicoForm.controls.acaoId.invalid) {
+          <div class="field-error" role="alert">Selecione uma ação válida.</div>
+        }
+        @if (acoesState.error) {
+          <div class="field-error" role="alert">
+            {{ acoesState.error.message }}
+            <button type="button" class="btn-finance-secondary acoes-retry" (click)="carregarAcoes()">Tentar novamente</button>
+          </div>
+        }
+      </div>
+      <div class="col-md-4">
+        <button class="btn-finance-secondary w-100" type="submit" [disabled]="listState.loading || acoesState.loading">Consultar histórico</button>
+      </div>
+    </form>
+    </section>
+
+    <section class="filter-panel surface-card" aria-labelledby="consulta-operacao">
+    <div class="panel-heading">
+      <p class="eyebrow">Consulta direta</p>
+      <h2 id="consulta-operacao">Buscar operação por ID</h2>
+    </div>
+    <form class="row g-3 align-items-end" [formGroup]="idForm" (ngSubmit)="buscarPorId()" novalidate>
+      <div class="col-md-8">
+        <label for="operacaoId" class="form-label">Identificador</label>
+        <input id="operacaoId" type="number" min="1" class="form-control" formControlName="id">
+        @if (idForm.controls.id.touched && idForm.controls.id.invalid) {
+          <div class="field-error" role="alert">Informe um ID positivo.</div>
+        }
+      </div>
+      <div class="col-md-4">
+        <button class="btn-finance-secondary w-100" type="submit" [disabled]="detailState.loading">
+          {{ detailState.loading ? 'Consultando…' : 'Consultar' }}
+        </button>
+      </div>
+    </form>
+    @if (detailState.loading) {
+      <div class="status-panel mt-3" role="status" aria-live="polite">Consultando operação…</div>
+    } @else if (detailState.error) {
+      <div class="status-panel status-panel--error mt-3" role="alert">{{ detailState.error.message }}</div>
+    } @else {
+      @if (detailState.data; as operacao) {
+        <div class="search-result mt-3" role="status">
+        <span
+          class="trade-badge"
+          [class.trade-badge--buy]="operacao.tipoOperacao === 'COMPRA'"
+          [class.trade-badge--sell]="operacao.tipoOperacao === 'VENDA'">
+          {{ operacao.tipoOperacao }}
+        </span>
+        <span class="ticker-badge">{{ operacao.acao.ticker }}</span>
+        <strong class="numeric">{{ operacao.quantidade }} unidade(s)</strong>
+        <span class="numeric">Total {{ operacao.valorTotal | currency:(operacao.acao.moeda || 'BRL') }}</span>
+        </div>
+      }
+    }
+    </section>
+  </div>
+
+  @if (listState.loading) {
+    <section class="status-panel surface-card" role="status" aria-live="polite">
+      <strong>Carregando operações…</strong>
+      <span>As movimentações estão sendo consultadas.</span>
+    </section>
+  } @else if (listState.error) {
+    <section class="status-panel status-panel--error surface-card" role="alert">
+      <strong>Não foi possível carregar as operações.</strong>
+      <span>{{ listState.error.message }}</span>
+      <button type="button" class="btn-finance-secondary" (click)="carregar()">Tentar novamente</button>
+    </section>
+  } @else if (listState.data?.length === 0) {
+    <section class="status-panel surface-card">
+      <strong>Nenhuma operação encontrada para o filtro selecionado.</strong>
+      <span>Altere o filtro ou registre uma nova movimentação.</span>
+    </section>
+  } @else if (listState.data) {
+    <section class="table-panel surface-card" aria-labelledby="historico-operacoes">
+      <div class="table-panel__header">
+        <div>
+          <p class="eyebrow">Extrato</p>
+          <h2 id="historico-operacoes">Histórico de operações</h2>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover finance-table finance-table--wide align-middle">
+          <caption class="visually-hidden">Histórico financeiro de compras e vendas</caption>
+          <thead>
+            <tr>
+              <th class="numeric" scope="col">ID</th>
+              <th scope="col">Data</th>
+              <th scope="col">Ação</th>
+              <th scope="col">Tipo</th>
+              <th class="numeric" scope="col">Quantidade</th>
+              <th class="numeric" scope="col">Preço unitário</th>
+              <th class="numeric" scope="col">Valor total</th>
+              <th class="numeric" scope="col">Preço médio</th>
+              <th class="numeric" scope="col">Lucro/prejuízo</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (operacao of listState.data; track operacao.id) {
+              <tr>
+                <td class="numeric">{{ operacao.id }}</td>
+                <td><span class="cell-secondary">{{ operacao.dataOperacao ? (operacao.dataOperacao | date:'short') : 'Não informado' }}</span></td>
+                <td><span class="ticker-badge">{{ operacao.acao.ticker }}</span></td>
+                <td>
+                  <span
+                    class="trade-badge"
+                    [class.trade-badge--buy]="operacao.tipoOperacao === 'COMPRA'"
+                    [class.trade-badge--sell]="operacao.tipoOperacao === 'VENDA'">
+                    {{ operacao.tipoOperacao }}
+                  </span>
+                </td>
+                <td class="numeric">{{ operacao.quantidade }}</td>
+                <td class="numeric">{{ operacao.precoUnitario | currency:(operacao.acao.moeda || 'BRL') }}</td>
+                <td class="numeric">{{ operacao.valorTotal | currency:(operacao.acao.moeda || 'BRL') }}</td>
+                <td class="numeric">{{ operacao.precoMedio === null ? 'Não informado' : (operacao.precoMedio | currency:(operacao.acao.moeda || 'BRL')) }}</td>
+                <td
+                  class="numeric"
+                  [class.value-positive]="operacao.lucroPrejuizo !== null && operacao.lucroPrejuizo > 0"
+                  [class.value-negative]="operacao.lucroPrejuizo !== null && operacao.lucroPrejuizo < 0">
+                  {{ operacao.lucroPrejuizo === null ? 'Não informado' : (operacao.lucroPrejuizo | currency:(operacao.acao.moeda || 'BRL')) }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

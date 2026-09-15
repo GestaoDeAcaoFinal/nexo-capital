@@ -1,0 +1,92 @@
+<div class="page-shell">
+  <nav class="breadcrumb-nav" aria-label="Navegação estrutural">
+    <a routerLink="/">Início</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">Nova corretora</span>
+  </nav>
+
+  <header class="form-heading">
+    <p class="eyebrow">Cadastro</p>
+    <h1 class="page-heading">Cadastrar corretora</h1>
+    <p class="form-intro">Informe CNPJ e CEP para validação e enriquecimento dos dados pelo backend.</p>
+  </header>
+
+  <section class="form-panel surface-card" aria-label="Dados da corretora">
+    <form class="finance-form" [formGroup]="form" (ngSubmit)="salvar()" novalidate>
+      <h2 class="form-section-title">Identificação da instituição</h2>
+      <div class="form-grid">
+        <div class="field-group">
+          <label for="cnpj" class="form-label">CNPJ</label>
+          <input
+            id="cnpj"
+            class="form-control"
+            formControlName="cnpj"
+            placeholder="12.345.678/0001-90"
+            autocomplete="off"
+            aria-describedby="cnpj-help cnpj-error"
+          >
+          <p id="cnpj-help" class="field-help">Use 14 dígitos, com ou sem pontuação.</p>
+          <div id="cnpj-error" class="field-error" aria-live="polite">
+            @if (form.controls.cnpj.touched && form.controls.cnpj.hasError('required')) {
+              <p>CNPJ é obrigatório.</p>
+            }
+            @if (form.controls.cnpj.touched && form.controls.cnpj.hasError('pattern')) {
+              <p>Informe 14 dígitos, com ou sem pontuação.</p>
+            }
+            @if (form.controls.cnpj.errors?.['server']; as messages) {
+              <p>{{ messages.join(' ') }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="cep" class="form-label">CEP</label>
+          <input
+            id="cep"
+            class="form-control"
+            formControlName="cep"
+            placeholder="01001-000"
+            autocomplete="postal-code"
+            aria-describedby="cep-help cep-error"
+          >
+          <p id="cep-help" class="field-help">Use 8 dígitos, com ou sem hífen.</p>
+          <div id="cep-error" class="field-error" aria-live="polite">
+            @if (form.controls.cep.touched && form.controls.cep.hasError('required')) {
+              <p>CEP é obrigatório.</p>
+            }
+            @if (form.controls.cep.touched && form.controls.cep.hasError('pattern')) {
+              <p>Informe 8 dígitos, com ou sem hífen.</p>
+            }
+            @if (form.controls.cep.errors?.['server']; as messages) {
+              <p>{{ messages.join(' ') }}</p>
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (state.error) {
+        <div class="status-panel status-panel--error" role="alert"><strong>{{ state.error.title }}:</strong> {{ state.error.message }}</div>
+      }
+      @if (state.successMessage) {
+        <div class="status-panel" role="status">{{ state.successMessage }}</div>
+      }
+
+      <div class="form-actions">
+        <button class="btn-finance-primary" type="submit" [disabled]="state.loading">
+          {{ state.loading ? 'Salvando…' : 'Salvar corretora' }}
+        </button>
+        <a routerLink="/corretoras" class="btn-finance-secondary">Cancelar</a>
+      </div>
+    </form>
+  </section>
+
+  @if (!state.loading && !state.error && state.data; as corretora) {
+    <section class="result-card surface-card" aria-labelledby="corretora-cadastrada">
+      <p class="eyebrow">Cadastro concluído</p>
+      <h2 id="corretora-cadastrada">Corretora cadastrada</h2>
+      <p><strong>Razão social:</strong> {{ corretora.razaoSocial }}</p>
+      <p><strong>CNPJ:</strong> {{ corretora.cnpj }}</p>
+      <p><strong>Localidade:</strong> {{ corretora.cidade }}/{{ corretora.uf }}</p>
+    </section>
+  }
+</div>

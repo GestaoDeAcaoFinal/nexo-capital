@@ -1,0 +1,110 @@
+<div class="page-shell">
+  <nav class="breadcrumb-nav" aria-label="Navegação estrutural">
+    <a routerLink="/">Início</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">Carteira</span>
+  </nav>
+
+  <header class="list-toolbar">
+    <div class="list-toolbar__copy">
+      <p class="eyebrow">Posição atual</p>
+      <h1 id="carteira-titulo" class="page-heading">Carteira consolidada</h1>
+      <p class="form-intro">Acompanhe o patrimônio investido e a composição atual da carteira.</p>
+    </div>
+    <button
+      type="button"
+      class="btn-finance-secondary"
+      [disabled]="carteiraState.loading"
+      (click)="carregarCarteira()">
+      Atualizar
+    </button>
+  </header>
+
+  <section class="portfolio-panel surface-card" aria-labelledby="carteira-titulo">
+    @if (carteiraState.loading) {
+      <div class="status-panel portfolio-status" role="status" aria-live="polite">
+        Carregando carteira consolidada&hellip;
+      </div>
+    } @else if (carteiraState.error) {
+      <div class="status-panel status-panel--error portfolio-status" role="alert">
+        <strong>Não foi possível carregar a carteira.</strong>
+        <span>{{ carteiraState.error.message }}</span>
+        <button
+          type="button"
+          class="btn-finance-secondary"
+          data-testid="carteira-retry"
+          (click)="carregarCarteira()">
+          Tentar novamente
+        </button>
+      </div>
+    } @else {
+      @if (carteiraState.data; as carteira) {
+        <div class="portfolio-metrics">
+          <article class="portfolio-metric">
+            <span>Valor atual</span>
+            <strong class="numeric" data-testid="valor-atual">{{ carteira.valorAtualCarteira | currency:'BRL' }}</strong>
+          </article>
+          <article class="portfolio-metric">
+            <span>Custo total</span>
+            <strong class="numeric" data-testid="custo-total">{{ carteira.custoTotalCarteira | currency:'BRL' }}</strong>
+          </article>
+          <article class="portfolio-metric">
+            <span>Resultado</span>
+            <strong
+              class="numeric"
+              data-testid="resultado"
+              [class.value-positive]="resultadoCarteira > 0"
+              [class.value-negative]="resultadoCarteira < 0">
+              {{ resultadoCarteira | currency:'BRL' }}
+            </strong>
+          </article>
+          <article class="portfolio-metric">
+            <span>Ações em posse</span>
+            <strong class="numeric" data-testid="quantidade-total">{{ carteira.quantidadeTotal }}</strong>
+          </article>
+          <article class="portfolio-metric">
+            <span>Número de posições</span>
+            <strong class="numeric" data-testid="numero-posicoes">{{ carteira.posicoes.length }}</strong>
+          </article>
+        </div>
+
+        <p class="currency-note">Valores de ativos internacionais convertidos para BRL pela cotação atual.</p>
+
+        @if (carteira.posicoes.length === 0) {
+          <div class="status-panel portfolio-status">
+            <strong>Nenhuma ação em posse.</strong>
+            <span>As novas compras aparecerão aqui.</span>
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table finance-table portfolio-table align-middle">
+              <caption class="visually-hidden">Posições atuais da carteira</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Ação</th>
+                  <th class="numeric" scope="col">Quantidade</th>
+                  <th class="numeric" scope="col">Preço médio</th>
+                  <th class="numeric" scope="col">Custo</th>
+                  <th class="numeric" scope="col">Cotação</th>
+                  <th class="numeric" scope="col">Valor atual</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (posicao of carteira.posicoes; track posicao.acaoId) {
+                  <tr [attr.data-testid]="'posicao-' + posicao.ticker">
+                    <td><span class="ticker-badge">{{ posicao.ticker }}</span></td>
+                    <td class="numeric">{{ posicao.quantidadeAtual }}</td>
+                    <td class="numeric">{{ posicao.precoMedio | currency:'BRL' }}</td>
+                    <td class="numeric">{{ posicao.custoTotal | currency:'BRL' }}</td>
+                    <td class="numeric">{{ posicao.cotacaoAtual | currency:'BRL' }}</td>
+                    <td class="numeric"><strong>{{ posicao.valorAtual | currency:'BRL' }}</strong></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+    }
+  </section>
+</div>

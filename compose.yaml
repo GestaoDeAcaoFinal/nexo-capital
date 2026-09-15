@@ -1,0 +1,50 @@
+name: nexo-capital
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gestaodeacao}
+      POSTGRES_USER: ${POSTGRES_USER:-gestao}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-postgres-password}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  app-host-postgresql:
+    image: nexo-capital-api:local
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DDL_AUTO: validate
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-gestaodeacao}
+      DB_USERNAME: ${POSTGRES_USER:-gestao}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-local-postgres-password}
+      TWELVE_DATA_API_KEY: ${TWELVE_DATA_API_KEY:-test-key}
+    ports:
+      - "127.0.0.1:${APP_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    image: nexo-capital-web:local
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-4200}:80"
+    depends_on:
+      - app-host-postgresql
+
+volumes:
+  postgres-data:

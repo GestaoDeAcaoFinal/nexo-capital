@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="003" author="gustavo">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="produto"/>
+                <not><tableExists tableName="acoes"/></not>
+            </and>
+        </preConditions>
+
+        <dropForeignKeyConstraint
+                baseTableName="operacao_acao"
+                constraintName="fk_operacao_acao_produto"/>
+        <dropForeignKeyConstraint
+                baseTableName="produto"
+                constraintName="fk_produto_corretora"/>
+
+        <renameTable oldTableName="produto" newTableName="acoes"/>
+
+        <addUniqueConstraint
+                tableName="acoes"
+                columnNames="ticker"
+                constraintName="uk_acoes_ticker"/>
+        <addUniqueConstraint
+                tableName="corretora"
+                columnNames="cnpj"
+                constraintName="uk_corretora_cnpj"/>
+
+        <addForeignKeyConstraint
+                baseTableName="acoes"
+                baseColumnNames="corretora_id"
+                referencedTableName="corretora"
+                referencedColumnNames="id"
+                constraintName="fk_acoes_corretora"/>
+        <addForeignKeyConstraint
+                baseTableName="operacao_acao"
+                baseColumnNames="acao_id"
+                referencedTableName="acoes"
+                referencedColumnNames="id"
+                constraintName="fk_operacao_acao_acao"/>
+
+        <rollback>
+            <dropForeignKeyConstraint
+                    baseTableName="operacao_acao"
+                    constraintName="fk_operacao_acao_acao"/>
+            <dropForeignKeyConstraint
+                    baseTableName="acoes"
+                    constraintName="fk_acoes_corretora"/>
+            <dropUniqueConstraint
+                    tableName="acoes"
+                    constraintName="uk_acoes_ticker"/>
+            <dropUniqueConstraint
+                    tableName="corretora"
+                    constraintName="uk_corretora_cnpj"/>
+
+            <renameTable oldTableName="acoes" newTableName="produto"/>
+
+            <addForeignKeyConstraint
+                    baseTableName="produto"
+                    baseColumnNames="corretora_id"
+                    referencedTableName="corretora"
+                    referencedColumnNames="id"
+                    constraintName="fk_produto_corretora"/>
+            <addForeignKeyConstraint
+                    baseTableName="operacao_acao"
+                    baseColumnNames="acao_id"
+                    referencedTableName="produto"
+                    referencedColumnNames="id"
+                    constraintName="fk_operacao_acao_produto"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
