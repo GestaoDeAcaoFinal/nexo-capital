@@ -23,7 +23,7 @@ jobs:
           cache: maven
           cache-dependency-path: backend/pom.xml
       - name: Testar backend
-        run: ./mvnw test
+        run: mvn --batch-mode test
 
   frontend:
     runs-on: ubuntu-latest
